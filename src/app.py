@@ -275,7 +275,7 @@ def main():
         run_optimization = st.button(
             "Run Optimization",
             type="primary",
-            use_container_width=True,
+            width="stretch",
             disabled=has_errors
         )
 
@@ -469,14 +469,14 @@ def main():
                 equal_weight=(results['eq_volatility'], results['eq_return']),
                 tickers=results['ticker_names']
             ),
-            use_container_width=True
+            width="stretch"
         )
 
         st.subheader("Optimal Portfolio Allocation")
         # Stacked layout for mobile - pie chart first, then weights table
         st.plotly_chart(
             plot_allocation_pie(results['optimal_weights'], results['ticker_names']),
-            use_container_width=True
+            width="stretch"
         )
         st.markdown("**Weights:**")
         # Create weights dataframe
@@ -491,7 +491,7 @@ def main():
         st.dataframe(
             weights_df,
             hide_index=True,
-            use_container_width=True,
+            width="stretch",
             column_config={
                 'Ticker': st.column_config.TextColumn('Ticker', width='small'),
                 'Weight': st.column_config.TextColumn('Weight', width='small')
@@ -511,7 +511,7 @@ def main():
             file_name="optimal_portfolio_weights.csv",
             mime="text/csv",
             icon=":material/download:",
-            use_container_width=True
+            width="stretch"
         )
 
     with tab2:
@@ -526,26 +526,26 @@ def main():
         st.subheader("Risk vs Return")
         st.plotly_chart(
             plot_risk_return_bars(results['comparison_df']),
-            use_container_width=True
+            width="stretch"
         )
 
         st.subheader("Sharpe Ratio Comparison")
         st.plotly_chart(
             plot_sharpe_comparison(results['comparison_df']),
-            use_container_width=True
+            width="stretch"
         )
 
     with tab3:
         st.subheader("Price History")
         st.plotly_chart(
             plot_price_history(results['prices']),
-            use_container_width=True
+            width="stretch"
         )
 
         st.subheader("Correlation Matrix")
         st.plotly_chart(
             plot_correlation_heatmap(results['correlation']),
-            use_container_width=True
+            width="stretch"
         )
 
 
