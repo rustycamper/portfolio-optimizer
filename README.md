@@ -13,6 +13,7 @@ For a detailed explanation of the math and methodology, see [Portfolio_Optimizat
 - Generates efficient frontier
 - Creates visualizations
 - Interactive web app with Plotly charts
+- Dark/light theme toggle
 - CLI for batch processing
 
 ## Project Structure
@@ -23,6 +24,7 @@ src/
 ├── config.py                # Settings and constants (tickers, risk parameters)
 ├── data.py                  # Fetch and preprocess stock data
 ├── optimization.py          # Portfolio optimization math (MPT algorithms)
+├── styles.py                # CSS styles for light/dark themes
 ├── visualization.py         # Matplotlib charts (CLI)
 ├── visualization_plotly.py  # Plotly charts (web app)
 ├── main.py                  # CLI entry point
