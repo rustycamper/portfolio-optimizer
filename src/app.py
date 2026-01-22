@@ -64,9 +64,9 @@ div[data-testid="stColumn"]:last-child button[kind="secondary"] p {
 /* Align title info button with title text */
 div[data-testid="stVerticalBlock"] > div:first-child div[data-testid="stColumn"]:last-child {
     display: flex !important;
-    align-items: center !important;
+    align-items: flex-end !important;
     justify-content: flex-end !important;
-    padding-top: 0.5rem !important;
+    padding-bottom: 0.75rem !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -518,38 +518,70 @@ def main():
         }
         /* Dialog/Modal styling */
         [data-testid="stModal"] > div:first-child {
-            background-color: rgba(0, 0, 0, 0.7) !important;
+            background-color: rgba(0, 0, 0, 0.6) !important;
         }
-        [data-testid="stModal"] > div > div {
-            background-color: #1a1a2e !important;
-            border: 1px solid #334155 !important;
+        [data-testid="stModal"] > div > div,
+        [data-testid="stModal"] [data-testid="stVerticalBlock"],
+        [data-testid="stModal"] section,
+        div[data-modal-container="true"] > div > div,
+        [role="dialog"],
+        [role="dialog"] > div {
+            background-color: #242945 !important;
+            color: #eaeaea !important;
+            border: 1px solid #3d4566 !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
         }
-        [data-testid="stModal"] [data-testid="stMarkdownContainer"] {
+        [data-testid="stModal"] *,
+        [role="dialog"] * {
+            color: #eaeaea !important;
+        }
+        [data-testid="stModal"] [data-testid="stMarkdownContainer"],
+        [role="dialog"] [data-testid="stMarkdownContainer"] {
             color: #eaeaea !important;
         }
         [data-testid="stModal"] h1, [data-testid="stModal"] h2,
-        [data-testid="stModal"] h3, [data-testid="stModal"] h4 {
+        [data-testid="stModal"] h3, [data-testid="stModal"] h4,
+        [role="dialog"] h1, [role="dialog"] h2,
+        [role="dialog"] h3, [role="dialog"] h4 {
             color: #eaeaea !important;
         }
-        [data-testid="stModal"] hr {
+        [data-testid="stModal"] hr, [role="dialog"] hr {
             border-color: #334155 !important;
         }
-        [data-testid="stModal"] a {
+        [data-testid="stModal"] a, [role="dialog"] a {
             color: #818cf8 !important;
+        }
+        /* Modal close button */
+        [data-testid="stModal"] button[aria-label="Close"],
+        [role="dialog"] button[aria-label="Close"] {
+            color: #eaeaea !important;
         }
         /* Info buttons in dark mode - brighter colors */
         div[data-testid="stColumn"]:last-child button[kind="secondary"] {
-            background-color: #818cf8 !important;
-            border: 2px solid #a5b4fc !important;
-            box-shadow: 0 0 10px rgba(129, 140, 248, 0.6) !important;
+            background-color: #a5b4fc !important;
+            border: 2px solid #c7d2fe !important;
+            box-shadow: 0 0 12px rgba(165, 180, 252, 0.7) !important;
         }
         div[data-testid="stColumn"]:last-child button[kind="secondary"]:hover {
-            background-color: #a5b4fc !important;
-            border-color: #c7d2fe !important;
-            box-shadow: 0 0 14px rgba(165, 180, 252, 0.8) !important;
+            background-color: #c7d2fe !important;
+            border-color: #e0e7ff !important;
+            box-shadow: 0 0 16px rgba(199, 210, 254, 0.9) !important;
         }
         div[data-testid="stColumn"]:last-child button[kind="secondary"] p {
-            color: white !important;
+            color: #1e1b4b !important;
+        }
+        /* Tooltip/help popover in dark mode */
+        [data-testid="stTooltipContent"],
+        div[data-baseweb="tooltip"] > div,
+        [role="tooltip"] {
+            background-color: #1a1a2e !important;
+            color: #eaeaea !important;
+            border: 1px solid #334155 !important;
+        }
+        /* Widget help icons (circle with ?) in dark mode */
+        [data-testid="stTooltipHoverTarget"] svg {
+            color: #e0e7ff !important;
+            stroke: #e0e7ff !important;
         }
         </style>
         """, unsafe_allow_html=True)
