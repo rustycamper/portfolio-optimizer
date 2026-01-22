@@ -159,6 +159,15 @@ def main():
     })
     optimal_portfolio_df.to_csv(OUTPUT_DIR / "optimal_portfolio_weights.csv", index=False)
 
+    # Export efficient frontier
+    efficient_df.to_csv(OUTPUT_DIR / "efficient_frontier.csv", index=False)
+
+    # Export individual asset statistics
+    individual_df.to_csv(OUTPUT_DIR / "individual_assets.csv", index=False)
+
+    # Export correlation matrix
+    correlation.to_csv(OUTPUT_DIR / "correlation_matrix.csv")
+
     print("\n" + "=" * 50)
     print("COMPLETE!")
     print("=" * 50)

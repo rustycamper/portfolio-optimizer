@@ -113,7 +113,7 @@ def plot_efficient_frontier(
             y=frontier_df['return'] * 100,
             mode='lines',
             name='Efficient Frontier',
-            line=dict(color='blue', width=3),
+            line=dict(color='#6366f1', width=3),
             hovertext=hover_texts,
             hoverinfo='text'
         ))
@@ -124,9 +124,10 @@ def plot_efficient_frontier(
         y=individual_df['return'] * 100,
         mode='markers+text',
         name='Individual Assets',
-        marker=dict(size=12, color='red', line=dict(width=2, color='black')),
+        marker=dict(size=10, color='#64748b'),
         text=individual_df['ticker'],
         textposition='top right',
+        textfont=dict(size=11, color='#475569'),
         hovertemplate=(
             '<b>%{text}</b><br>'
             'Return: %{y:.2f}%<br>'
@@ -147,7 +148,7 @@ def plot_efficient_frontier(
         y=[opt_ret * 100],
         mode='markers',
         name='Optimal Portfolio',
-        marker=dict(size=20, color='gold', symbol='star', line=dict(width=2, color='black')),
+        marker=dict(size=16, color='#f59e0b', symbol='star'),
         hovertext=f'<b>Optimal Portfolio</b><br>Return: {opt_ret*100:.2f}%<br>'
                   f'Volatility: {opt_vol*100:.2f}%<br><br><b>Weights:</b><br>{opt_weights_text}',
         hoverinfo='text'
@@ -160,7 +161,7 @@ def plot_efficient_frontier(
         y=[eq_ret * 100],
         mode='markers',
         name='Equal-Weight Portfolio',
-        marker=dict(size=15, color='green', symbol='diamond', line=dict(width=2, color='black')),
+        marker=dict(size=12, color='#10b981', symbol='diamond'),
         hovertemplate=(
             '<b>Equal-Weight Portfolio</b><br>'
             'Return: %{y:.2f}%<br>'
@@ -170,12 +171,19 @@ def plot_efficient_frontier(
     ))
 
     fig.update_layout(
-        title='Efficient Frontier - Portfolio Optimization',
+        template='simple_white',
         xaxis_title='Annual Volatility (Risk) %',
         yaxis_title='Annual Return %',
         height=450,
-        legend=dict(orientation='h', yanchor='top', y=-0.15, xanchor='center', x=0.5),
-        hovermode='closest'
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='left',
+            x=0
+        ),
+        hovermode='closest',
+        margin=dict(t=60)
     )
     return fig
 

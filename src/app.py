@@ -3,6 +3,9 @@
 This module provides an interactive web interface for the portfolio optimizer,
 allowing users to select tickers, adjust parameters, and view results.
 """
+import io
+import zipfile
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -116,8 +119,6 @@ def main():
 
     # ========== SIDEBAR ==========
     with st.sidebar:
-        st.header("Settings")
-
         # Ticker selection
         st.subheader("Ticker Selection")
 
@@ -259,9 +260,6 @@ def main():
             value=True,
             help="Compare your portfolio against S&P 500 (SPY) and Nasdaq 100 (QQQ)"
         )
-
-        # Run button
-        st.divider()
 
         # Validation
         has_errors = False
@@ -498,18 +496,31 @@ def main():
             }
         )
 
-        # Download button
-        csv_data = pd.DataFrame({
-            'Ticker': results['ticker_names'],
-            'Weight': results['optimal_weights'],
-            'Weight_Percent': results['optimal_weights'] * 100
-        }).to_csv(index=False)
+        # Create zip file with all CSV exports
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+            # Optimal portfolio weights
+            weights_csv = pd.DataFrame({
+                'Ticker': results['ticker_names'],
+                'Weight': results['optimal_weights'],
+                'Weight_Percent': results['optimal_weights'] * 100
+            }).to_csv(index=False)
+            zf.writestr('optimal_portfolio_weights.csv', weights_csv)
+
+            # Efficient frontier
+            zf.writestr('efficient_frontier.csv', results['efficient_df'].to_csv(index=False))
+
+            # Individual asset statistics
+            zf.writestr('individual_assets.csv', results['individual_df'].to_csv(index=False))
+
+            # Correlation matrix
+            zf.writestr('correlation_matrix.csv', results['correlation'].to_csv())
 
         st.download_button(
-            label="Download CSV",
-            data=csv_data,
-            file_name="optimal_portfolio_weights.csv",
-            mime="text/csv",
+            label="Download All Data (ZIP)",
+            data=zip_buffer.getvalue(),
+            file_name="portfolio_analysis.zip",
+            mime="application/zip",
             icon=":material/download:",
             width="stretch"
         )
