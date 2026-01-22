@@ -291,7 +291,7 @@ def main():
             )
             return
 
-        with st.spinner("Fetching stock data..."):
+        with st.spinner("Running optimization..."):
             try:
                 prices = get_stock_data(
                     tuple(sorted(selected_tickers)),
@@ -302,13 +302,11 @@ def main():
                 st.error(f"Error fetching data: {e}")
                 return
 
-        with st.spinner("Calculating metrics..."):
             returns = calculate_returns(prices)
             mean_returns, cov_matrix, correlation = calculate_metrics(
                 returns, TRADING_DAYS_PER_YEAR
             )
 
-        with st.spinner("Running optimization..."):
             max_w = max_weight if use_max_weight else None
             min_w = min_weight if use_min_weight else None
 
@@ -335,61 +333,59 @@ def main():
                 equal_weights, mean_returns, cov_matrix, risk_free_rate
             )
 
-        with st.spinner("Generating efficient frontier..."):
             efficient_df = generate_efficient_frontier(
                 mean_returns, cov_matrix, risk_free_rate,
                 max_weight=max_w, min_weight=min_w, n_points=50
             )
 
-        if efficient_df.empty:
-            st.warning("Could not generate efficient frontier with current constraints. Try relaxing the weight constraints.")
+            if efficient_df.empty:
+                st.warning("Could not generate efficient frontier with current constraints. Try relaxing the weight constraints.")
 
-        # Individual asset stats
-        ticker_names = prices.columns.tolist()
-        individual_stats = []
+            # Individual asset stats
+            ticker_names = prices.columns.tolist()
+            individual_stats = []
 
-        for i, ticker in enumerate(ticker_names):
-            weights = np.zeros(len(ticker_names))
-            weights[i] = 1.0
-            ret, vol, sharpe = portfolio_stats(
-                weights, mean_returns, cov_matrix, risk_free_rate
-            )
-            individual_stats.append({
-                'ticker': ticker,
-                'return': ret,
-                'volatility': vol,
-                'sharpe': sharpe
-            })
+            for i, ticker in enumerate(ticker_names):
+                weights = np.zeros(len(ticker_names))
+                weights[i] = 1.0
+                ret, vol, sharpe = portfolio_stats(
+                    weights, mean_returns, cov_matrix, risk_free_rate
+                )
+                individual_stats.append({
+                    'ticker': ticker,
+                    'return': ret,
+                    'volatility': vol,
+                    'sharpe': sharpe
+                })
 
-        individual_df = pd.DataFrame(individual_stats)
+            individual_df = pd.DataFrame(individual_stats)
 
-        # Fetch benchmark data if enabled
-        benchmark_stats = {}
-        if show_benchmarks:
-            with st.spinner("Fetching benchmark data..."):
+            # Fetch benchmark data if enabled
+            benchmark_stats = {}
+            if show_benchmarks:
                 benchmark_stats = get_benchmark_stats(
                     str(start_date), str(end_date), risk_free_rate
                 )
 
-        # Comparison data
-        assets = list(ticker_names) + ['Optimal', 'Equal-Weight']
-        returns_list = list(individual_df['return'] * 100) + [opt_return * 100, eq_return * 100]
-        vol_list = list(individual_df['volatility'] * 100) + [opt_volatility * 100, eq_volatility * 100]
-        sharpe_list = list(individual_df['sharpe']) + [opt_sharpe, eq_sharpe]
+            # Comparison data
+            assets = list(ticker_names) + ['Optimal', 'Equal-Weight']
+            returns_list = list(individual_df['return'] * 100) + [opt_return * 100, eq_return * 100]
+            vol_list = list(individual_df['volatility'] * 100) + [opt_volatility * 100, eq_volatility * 100]
+            sharpe_list = list(individual_df['sharpe']) + [opt_sharpe, eq_sharpe]
 
-        # Add benchmarks to comparison
-        for name, stats in benchmark_stats.items():
-            assets.append(name)
-            returns_list.append(stats['return'] * 100)
-            vol_list.append(stats['volatility'] * 100)
-            sharpe_list.append(stats['sharpe'])
+            # Add benchmarks to comparison
+            for name, stats in benchmark_stats.items():
+                assets.append(name)
+                returns_list.append(stats['return'] * 100)
+                vol_list.append(stats['volatility'] * 100)
+                sharpe_list.append(stats['sharpe'])
 
-        comparison_df = pd.DataFrame({
-            'Asset': assets,
-            'Return': returns_list,
-            'Volatility': vol_list,
-            'Sharpe': sharpe_list
-        })
+            comparison_df = pd.DataFrame({
+                'Asset': assets,
+                'Return': returns_list,
+                'Volatility': vol_list,
+                'Sharpe': sharpe_list
+            })
 
         # Store results in session state (including settings used)
         st.session_state['results'] = {
@@ -458,7 +454,20 @@ def main():
                 help="Return per unit of risk — like miles per gallon for investments. Above 1 is good, above 2 is great!"
             )
 
-        st.subheader("Efficient Frontier")
+        cols = st.columns([0.9, 0.1], vertical_alignment="center")
+        cols[0].subheader("Efficient Frontier")
+        with cols[1].popover("ⓘ"):
+            st.markdown("""
+            **What is the Efficient Frontier?**
+
+            The curved line shows the best possible portfolios — those that give you
+            the highest return for each level of risk.
+
+            - **Points on the line**: Optimal combinations of stocks
+            - **Points below the line**: Less efficient (you could do better!)
+            - **Star**: Your optimal portfolio (highest Sharpe ratio)
+            - **Diamond**: Equal-weight portfolio (same % in each stock)
+            """)
         st.plotly_chart(
             plot_efficient_frontier(
                 results['efficient_df'],
@@ -470,7 +479,19 @@ def main():
             width="stretch"
         )
 
-        st.subheader("Optimal Portfolio Allocation")
+        cols = st.columns([0.9, 0.1], vertical_alignment="center")
+        cols[0].subheader("Optimal Portfolio Allocation")
+        with cols[1].popover("ⓘ"):
+            st.markdown("""
+            **What is this showing?**
+
+            This pie chart shows how to divide your money across different stocks
+            to maximize your risk-adjusted return (Sharpe ratio).
+
+            - Larger slices = invest more in that stock
+            - Some stocks may have 0% — the optimizer chose to skip them
+            - The weights always add up to 100%
+            """)
         # Stacked layout for mobile - pie chart first, then weights table
         st.plotly_chart(
             plot_allocation_pie(results['optimal_weights'], results['ticker_names']),
@@ -534,26 +555,78 @@ def main():
             ":violet-background[Benchmarks]"
         )
 
-        st.subheader("Risk vs Return")
+        cols = st.columns([0.9, 0.1], vertical_alignment="center")
+        cols[0].subheader("Risk vs Return")
+        with cols[1].popover("ⓘ"):
+            st.markdown("""
+            **Understanding Risk vs Return**
+
+            This chart compares the expected return and volatility (risk) of each asset.
+
+            - **Return**: How much you might earn per year (higher = better)
+            - **Volatility**: How much the price swings up and down (lower = safer)
+            - Ideally, you want high return with low volatility
+            """)
         st.plotly_chart(
             plot_risk_return_bars(results['comparison_df']),
             width="stretch"
         )
 
-        st.subheader("Sharpe Ratio Comparison")
+        cols = st.columns([0.9, 0.1], vertical_alignment="center")
+        cols[0].subheader("Sharpe Ratio Comparison")
+        with cols[1].popover("ⓘ"):
+            st.markdown("""
+            **What is the Sharpe Ratio?**
+
+            The Sharpe ratio measures return per unit of risk — like "miles per gallon"
+            for investments.
+
+            - **Above 1.0**: Good risk-adjusted return
+            - **Above 2.0**: Very good
+            - **Below 0**: You'd be better off in a savings account!
+
+            The dashed line marks Sharpe = 1.0 as a reference.
+            """)
         st.plotly_chart(
             plot_sharpe_comparison(results['comparison_df']),
             width="stretch"
         )
 
     with tab3:
-        st.subheader("Price History")
+        cols = st.columns([0.9, 0.1], vertical_alignment="center")
+        cols[0].subheader("Price History")
+        with cols[1].popover("ⓘ"):
+            st.markdown("""
+            **Reading the Price History**
+
+            All stocks are normalized to start at 100, making it easy to compare
+            their performance over time.
+
+            - **Line going up**: Stock gained value
+            - **Line going down**: Stock lost value
+            - **Steeper line**: Faster gains or losses
+            - **Wiggly line**: More volatile (riskier)
+            """)
         st.plotly_chart(
             plot_price_history(results['prices']),
             width="stretch"
         )
 
-        st.subheader("Correlation Matrix")
+        cols = st.columns([0.9, 0.1], vertical_alignment="center")
+        cols[0].subheader("Correlation Matrix")
+        with cols[1].popover("ⓘ"):
+            st.markdown("""
+            **What is Correlation?**
+
+            Correlation shows how stocks move together, from -1 to +1.
+
+            - **+1 (red)**: Stocks move in the same direction
+            - **0 (white)**: No relationship
+            - **-1 (blue)**: Stocks move in opposite directions
+
+            For diversification, you want stocks with low correlation — when one
+            goes down, another might go up!
+            """)
         st.plotly_chart(
             plot_correlation_heatmap(results['correlation']),
             width="stretch"
