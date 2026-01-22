@@ -70,7 +70,7 @@ def get_stock_data(tickers: tuple[str, ...], start: str, end: str) -> pd.DataFra
     return fetch_stock_data(list(tickers), start, end)
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl=3600)  # Cache for 1 hour
 def get_benchmark_stats(start: str, end: str, risk_free_rate: float) -> dict:
     """Fetch and calculate benchmark statistics."""
     benchmarks = {}
