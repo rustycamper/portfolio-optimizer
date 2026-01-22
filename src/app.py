@@ -57,7 +57,7 @@ def validate_ticker(ticker: str) -> bool:
         return False
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl=3600)  # Cache for 1 hour to reduce API calls
 def get_stock_data(tickers: tuple[str, ...], start: str, end: str) -> pd.DataFrame:
     """Fetch stock data with caching to avoid re-downloading."""
     return fetch_stock_data(list(tickers), start, end)

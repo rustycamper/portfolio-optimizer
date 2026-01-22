@@ -28,17 +28,38 @@ def fetch_stock_data(tickers: list[str], start: str, end: str) -> pd.DataFrame:
         ValueError: If no data is returned for the given tickers.
     """
     print("Downloading stock data...")
-    data = yf.download(tickers, start=start, end=end, progress=False, auto_adjust=False)
+    try:
+        data = yf.download(tickers, start=start, end=end, progress=False, auto_adjust=False)
+    except Exception as e:
+        raise ValueError(
+            f"Failed to download data. Yahoo Finance may be rate limiting requests. "
+            f"Please wait a moment and try again. Error: {e}"
+        )
 
     if data.empty:
-        raise ValueError(f"No data returned for tickers: {tickers}")
+        raise ValueError(
+            f"No data returned for tickers: {tickers}. "
+            "This may be due to rate limiting — please wait a moment and try again."
+        )
 
     # Handle MultiIndex columns from yfinance (when downloading multiple tickers)
     if isinstance(data.columns, pd.MultiIndex):
         data = data['Adj Close']
 
+    # Check which tickers we actually got data for
+    if isinstance(data, pd.Series):
+        # Single ticker case
+        data = data.to_frame(name=tickers[0])
+
     # Remove any rows with missing data
     data = data.dropna()
+
+    if data.empty:
+        raise ValueError(
+            "No valid data after removing missing values. "
+            "Some tickers may have failed to download due to rate limiting. "
+            "Please wait a moment and try again."
+        )
 
     print(f"\nData shape: {data.shape}")
     print(f"Date range: {data.index[0]} to {data.index[-1]}")
