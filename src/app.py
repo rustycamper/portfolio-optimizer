@@ -558,6 +558,7 @@ def main():
     tab1, tab2, tab3 = st.tabs(["Optimization", "Comparison", "Price History"])
 
     with tab1:
+        st.caption("See your optimal portfolio allocation and the efficient frontier — the best risk-return tradeoffs.")
         # Portfolio metrics
         col1, col2, col3 = st.columns(3, gap="small")
         with col1:
@@ -660,6 +661,7 @@ def main():
         )
 
     with tab2:
+        st.caption("Compare risk, return, and Sharpe ratio across individual stocks, your portfolio, and market benchmarks.")
         # Color legend matching chart colors
         st.markdown(
             '<span style="font-size: 0.875rem;">'
@@ -690,6 +692,7 @@ def main():
         )
 
     with tab3:
+        st.caption("Explore how stock prices moved over time and how closely they move together (correlation).")
         cols = st.columns([20, 1], vertical_alignment="center", gap="small")
         cols[0].subheader("Price History")
         if cols[1].button("ⓘ", key="info_price"):
