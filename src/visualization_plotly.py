@@ -9,15 +9,39 @@ import pandas as pd
 import numpy as np
 
 
-def plot_correlation_heatmap(correlation: pd.DataFrame) -> go.Figure:
+def _get_layout_colors(dark_mode: bool = False):
+    """Get layout colors based on dark mode setting."""
+    if dark_mode:
+        return {
+            'template': 'plotly_dark',
+            'paper_bgcolor': '#1a1a2e',
+            'plot_bgcolor': '#1a1a2e',
+            'font_color': '#eaeaea',
+            'text_color': '#eaeaea',
+            'gridcolor': '#334155',
+        }
+    else:
+        return {
+            'template': 'simple_white',
+            'paper_bgcolor': 'white',
+            'plot_bgcolor': 'white',
+            'font_color': '#1f2937',
+            'text_color': '#475569',
+            'gridcolor': '#e5e7eb',
+        }
+
+
+def plot_correlation_heatmap(correlation: pd.DataFrame, dark_mode: bool = False) -> go.Figure:
     """Create an interactive correlation heatmap.
 
     Args:
         correlation: Correlation matrix DataFrame.
+        dark_mode: Whether to use dark theme.
 
     Returns:
         Plotly Figure object.
     """
+    colors = _get_layout_colors(dark_mode)
     fig = px.imshow(
         correlation,
         text_auto='.2f',
@@ -27,7 +51,10 @@ def plot_correlation_heatmap(correlation: pd.DataFrame) -> go.Figure:
         aspect='auto'
     )
     fig.update_layout(
-        title='Stock Correlation Matrix',
+        template=colors['template'],
+        paper_bgcolor=colors['paper_bgcolor'],
+        plot_bgcolor=colors['plot_bgcolor'],
+        font_color=colors['font_color'],
         xaxis_title='',
         yaxis_title='',
         height=450
@@ -35,17 +62,19 @@ def plot_correlation_heatmap(correlation: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def plot_price_history(prices: pd.DataFrame) -> go.Figure:
+def plot_price_history(prices: pd.DataFrame, dark_mode: bool = False) -> go.Figure:
     """Create an interactive price history chart.
 
     Normalizes all prices to start at 100 for easy comparison.
 
     Args:
         prices: DataFrame of stock prices with dates as index.
+        dark_mode: Whether to use dark theme.
 
     Returns:
         Plotly Figure object.
     """
+    colors = _get_layout_colors(dark_mode)
     # Normalize to base 100 for comparison
     normalized = prices.div(prices.iloc[0]) * 100
 
@@ -60,14 +89,21 @@ def plot_price_history(prices: pd.DataFrame) -> go.Figure:
         ))
 
     fig.update_layout(
-        title='Normalized Price History (Base 100)',
+        template=colors['template'],
+        paper_bgcolor=colors['paper_bgcolor'],
+        plot_bgcolor=colors['plot_bgcolor'],
+        font_color=colors['font_color'],
         xaxis_title='Date',
         yaxis_title='Normalized Price',
         hovermode='x unified',
         height=450,
-        legend=dict(orientation='h', yanchor='top', y=-0.15, xanchor='center', x=0.5)
+        legend=dict(
+            orientation='h', yanchor='top', y=-0.15, xanchor='center', x=0.5,
+            font=dict(color=colors['font_color'])
+        )
     )
-    fig.update_xaxes(rangeslider_visible=False)
+    fig.update_xaxes(rangeslider_visible=False, gridcolor=colors['gridcolor'])
+    fig.update_yaxes(gridcolor=colors['gridcolor'])
     return fig
 
 
@@ -76,7 +112,8 @@ def plot_efficient_frontier(
     individual_df: pd.DataFrame,
     optimal: tuple[float, float, np.ndarray],
     equal_weight: tuple[float, float],
-    tickers: list[str]
+    tickers: list[str],
+    dark_mode: bool = False
 ) -> go.Figure:
     """Create an interactive efficient frontier chart.
 
@@ -86,10 +123,12 @@ def plot_efficient_frontier(
         optimal: Tuple of (volatility, return, weights) for optimal portfolio.
         equal_weight: Tuple of (volatility, return) for equal-weight portfolio.
         tickers: List of ticker symbols.
+        dark_mode: Whether to use dark theme.
 
     Returns:
         Plotly Figure object.
     """
+    colors = _get_layout_colors(dark_mode)
     fig = go.Figure()
 
     # Efficient frontier line with hover showing weights (if data available)
@@ -127,7 +166,7 @@ def plot_efficient_frontier(
         marker=dict(size=10, color='#64748b'),
         text=individual_df['ticker'],
         textposition='top right',
-        textfont=dict(size=11, color='#475569'),
+        textfont=dict(size=11, color=colors['text_color']),
         hovertemplate=(
             '<b>%{text}</b><br>'
             'Return: %{y:.2f}%<br>'
@@ -171,7 +210,10 @@ def plot_efficient_frontier(
     ))
 
     fig.update_layout(
-        template='simple_white',
+        template=colors['template'],
+        paper_bgcolor=colors['paper_bgcolor'],
+        plot_bgcolor=colors['plot_bgcolor'],
+        font_color=colors['font_color'],
         xaxis_title='Annual Volatility (Risk) %',
         yaxis_title='Annual Return %',
         height=450,
@@ -180,24 +222,29 @@ def plot_efficient_frontier(
             yanchor='bottom',
             y=1.02,
             xanchor='left',
-            x=0
+            x=0,
+            font=dict(color=colors['font_color'])
         ),
         hovermode='closest',
         margin=dict(t=60)
     )
+    fig.update_xaxes(gridcolor=colors['gridcolor'])
+    fig.update_yaxes(gridcolor=colors['gridcolor'])
     return fig
 
 
-def plot_allocation_pie(weights: np.ndarray, tickers: list[str]) -> go.Figure:
+def plot_allocation_pie(weights: np.ndarray, tickers: list[str], dark_mode: bool = False) -> go.Figure:
     """Create an interactive pie chart of portfolio allocation.
 
     Args:
         weights: Array of portfolio weights.
         tickers: List of ticker symbols.
+        dark_mode: Whether to use dark theme.
 
     Returns:
         Plotly Figure object.
     """
+    colors = _get_layout_colors(dark_mode)
     # Filter out near-zero weights
     data = [(ticker, weight) for ticker, weight in zip(tickers, weights) if weight > 0.01]
 
@@ -217,7 +264,9 @@ def plot_allocation_pie(weights: np.ndarray, tickers: list[str]) -> go.Figure:
     )])
 
     fig.update_layout(
-        title='Optimal Portfolio Allocation',
+        template=colors['template'],
+        paper_bgcolor=colors['paper_bgcolor'],
+        font_color=colors['font_color'],
         height=450
     )
     return fig
@@ -238,16 +287,18 @@ def _get_bar_colors(comparison_df: pd.DataFrame) -> list[str]:
     return colors
 
 
-def plot_risk_return_bars(comparison_df: pd.DataFrame) -> go.Figure:
+def plot_risk_return_bars(comparison_df: pd.DataFrame, dark_mode: bool = False) -> go.Figure:
     """Create grouped bar charts comparing returns and volatility.
 
     Args:
         comparison_df: DataFrame with 'Asset', 'Return', 'Volatility' columns.
+        dark_mode: Whether to use dark theme.
 
     Returns:
         Plotly Figure object.
     """
-    colors = _get_bar_colors(comparison_df)
+    layout_colors = _get_layout_colors(dark_mode)
+    bar_colors = _get_bar_colors(comparison_df)
 
     fig = go.Figure()
 
@@ -255,7 +306,7 @@ def plot_risk_return_bars(comparison_df: pd.DataFrame) -> go.Figure:
         name='Return (%)',
         x=comparison_df['Asset'],
         y=comparison_df['Return'],
-        marker_color=colors,
+        marker_color=bar_colors,
         hovertemplate='<b>%{x}</b><br>Return: %{y:.2f}%<extra></extra>'
     ))
 
@@ -263,43 +314,52 @@ def plot_risk_return_bars(comparison_df: pd.DataFrame) -> go.Figure:
         name='Volatility (%)',
         x=comparison_df['Asset'],
         y=comparison_df['Volatility'],
-        marker_color=colors,
-        marker_line_color='black',
+        marker_color=bar_colors,
+        marker_line_color='gray' if dark_mode else 'black',
         marker_line_width=1,
         opacity=0.7,
         hovertemplate='<b>%{x}</b><br>Volatility: %{y:.2f}%<extra></extra>'
     ))
 
     fig.update_layout(
-        title='Risk vs Return Comparison',
+        template=layout_colors['template'],
+        paper_bgcolor=layout_colors['paper_bgcolor'],
+        plot_bgcolor=layout_colors['plot_bgcolor'],
+        font_color=layout_colors['font_color'],
         xaxis_title='Asset',
         yaxis_title='Percentage (%)',
         barmode='group',
         height=450,
-        legend=dict(orientation='h', yanchor='top', y=-0.2, xanchor='center', x=0.5)
+        legend=dict(
+            orientation='h', yanchor='top', y=-0.2, xanchor='center', x=0.5,
+            font=dict(color=layout_colors['font_color'])
+        )
     )
-    fig.update_xaxes(tickangle=-45)
+    fig.update_xaxes(tickangle=-45, gridcolor=layout_colors['gridcolor'])
+    fig.update_yaxes(gridcolor=layout_colors['gridcolor'])
     return fig
 
 
-def plot_sharpe_comparison(comparison_df: pd.DataFrame) -> go.Figure:
+def plot_sharpe_comparison(comparison_df: pd.DataFrame, dark_mode: bool = False) -> go.Figure:
     """Create a bar chart comparing Sharpe ratios.
 
     Args:
         comparison_df: DataFrame with 'Asset' and 'Sharpe' columns.
+        dark_mode: Whether to use dark theme.
 
     Returns:
         Plotly Figure object.
     """
-    colors = _get_bar_colors(comparison_df)
+    layout_colors = _get_layout_colors(dark_mode)
+    bar_colors = _get_bar_colors(comparison_df)
 
     fig = go.Figure()
 
     fig.add_trace(go.Bar(
         x=comparison_df['Asset'],
         y=comparison_df['Sharpe'],
-        marker_color=colors,
-        marker_line_color='black',
+        marker_color=bar_colors,
+        marker_line_color='gray' if dark_mode else 'black',
         marker_line_width=1,
         hovertemplate='<b>%{x}</b><br>Sharpe Ratio: %{y:.3f}<extra></extra>'
     ))
@@ -308,16 +368,20 @@ def plot_sharpe_comparison(comparison_df: pd.DataFrame) -> go.Figure:
     fig.add_hline(
         y=1.0,
         line_dash='dash',
-        line_color='green',
+        line_color='#10b981',
         annotation_text='Sharpe = 1.0',
         annotation_position='right'
     )
 
     fig.update_layout(
-        title='Sharpe Ratio Comparison (Higher is Better)',
+        template=layout_colors['template'],
+        paper_bgcolor=layout_colors['paper_bgcolor'],
+        plot_bgcolor=layout_colors['plot_bgcolor'],
+        font_color=layout_colors['font_color'],
         xaxis_title='Asset',
         yaxis_title='Sharpe Ratio',
         height=450
     )
-    fig.update_xaxes(tickangle=-45)
+    fig.update_xaxes(tickangle=-45, gridcolor=layout_colors['gridcolor'])
+    fig.update_yaxes(gridcolor=layout_colors['gridcolor'])
     return fig

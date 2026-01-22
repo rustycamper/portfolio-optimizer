@@ -32,11 +32,19 @@ st.set_page_config(
     layout="centered"  # Better mobile default
 )
 
-# Custom CSS for info buttons
+# Custom CSS for info buttons (applied globally, dark mode adjustments below)
 st.markdown("""
 <style>
-/* Style info buttons and popovers */
-button[kind="secondary"]:has(p:only-child) {
+/* Style info buttons (only single-character buttons) */
+button[kind="secondary"] p:only-child {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+button[kind="secondary"]:has(p:only-child:not(:empty)) {
+    container-type: inline-size;
+}
+div[data-testid="stColumn"]:last-child button[kind="secondary"] {
     background-color: #6366f1 !important;
     color: white !important;
     border: none !important;
@@ -46,11 +54,19 @@ button[kind="secondary"]:has(p:only-child) {
     padding: 0 !important;
     min-height: 0 !important;
 }
-button[kind="secondary"]:has(p:only-child):hover {
+div[data-testid="stColumn"]:last-child button[kind="secondary"]:hover {
     background-color: #4f46e5 !important;
 }
-button[kind="secondary"]:has(p:only-child) p {
+div[data-testid="stColumn"]:last-child button[kind="secondary"] p {
     font-size: 16px !important;
+    color: white !important;
+}
+/* Align title info button with title text */
+div[data-testid="stVerticalBlock"] > div:first-child div[data-testid="stColumn"]:last-child {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    padding-top: 0.5rem !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -113,6 +129,83 @@ def get_benchmark_stats(start: str, end: str, risk_free_rate: float) -> dict:
     return benchmarks
 
 
+@st.dialog("Efficient Frontier")
+def show_frontier_info():
+    st.markdown("""
+    The curved line shows the best possible portfolios — those that give you
+    the highest return for each level of risk.
+
+    - **Points on the line**: Optimal combinations of stocks
+    - **Points below the line**: Less efficient (you could do better!)
+    - **Star**: Your optimal portfolio (highest Sharpe ratio)
+    - **Diamond**: Equal-weight portfolio (same % in each stock)
+    """)
+
+
+@st.dialog("Portfolio Allocation")
+def show_allocation_info():
+    st.markdown("""
+    This pie chart shows how to divide your money across different stocks
+    to maximize your risk-adjusted return (Sharpe ratio).
+
+    - Larger slices = invest more in that stock
+    - Some stocks may have 0% — the optimizer chose to skip them
+    - The weights always add up to 100%
+    """)
+
+
+@st.dialog("Risk vs Return")
+def show_risk_return_info():
+    st.markdown("""
+    This chart compares the expected return and volatility (risk) of each asset.
+
+    - **Return**: How much you might earn per year (higher = better)
+    - **Volatility**: How much the price swings up and down (lower = safer)
+    - Ideally, you want high return with low volatility
+    """)
+
+
+@st.dialog("Sharpe Ratio")
+def show_sharpe_info():
+    st.markdown("""
+    The Sharpe ratio measures return per unit of risk — like "miles per gallon"
+    for investments.
+
+    - **Above 1.0**: Good risk-adjusted return
+    - **Above 2.0**: Very good
+    - **Below 0**: You'd be better off in a savings account!
+
+    The dashed line marks Sharpe = 1.0 as a reference.
+    """)
+
+
+@st.dialog("Price History")
+def show_price_info():
+    st.markdown("""
+    All stocks are normalized to start at 100, making it easy to compare
+    their performance over time.
+
+    - **Line going up**: Stock gained value
+    - **Line going down**: Stock lost value
+    - **Steeper line**: Faster gains or losses
+    - **Wiggly line**: More volatile (riskier)
+    """)
+
+
+@st.dialog("Correlation Matrix")
+def show_correlation_info():
+    st.markdown("""
+    Correlation shows how stocks move together, from -1 to +1.
+
+    - **+1 (red)**: Stocks move in the same direction
+    - **0 (white)**: No relationship
+    - **-1 (blue)**: Stocks move in opposite directions
+
+    For diversification, you want stocks with low correlation — when one
+    goes down, another might go up!
+    """)
+
+
 @st.dialog("About This App", width="large")
 def show_about_dialog():
     st.markdown("""
@@ -152,7 +245,7 @@ def show_about_dialog():
 
 
 def main():
-    cols = st.columns([0.93, 0.07], vertical_alignment="center")
+    cols = st.columns([0.9, 0.1], vertical_alignment="center")
     cols[0].title("Portfolio Optimizer")
     if cols[1].button("ⓘ", help="About this app"):
         show_about_dialog()
@@ -164,6 +257,7 @@ def main():
 
     # ========== SIDEBAR ==========
     with st.sidebar:
+
         # Ticker selection
         st.subheader("Ticker Selection")
 
@@ -321,6 +415,147 @@ def main():
             width="stretch",
             disabled=has_errors
         )
+
+        # Theme toggle at the bottom
+        st.divider()
+        if 'dark_mode' not in st.session_state:
+            st.session_state.dark_mode = True  # Dark mode is default
+        # Read from toggle key if it exists (updated immediately on toggle), else use dark_mode
+        current_mode = st.session_state.get('dark_mode_toggle', st.session_state.dark_mode)
+        theme_icon = "🌙" if current_mode else "☀️"
+        dark_mode = st.toggle(
+            f"{theme_icon} Theme",
+            value=st.session_state.dark_mode,
+            key="dark_mode_toggle",
+            help="Toggle between dark and light mode"
+        )
+        st.session_state.dark_mode = dark_mode
+
+    # Apply dark mode CSS (outside sidebar context)
+    if st.session_state.get('dark_mode', True):
+        st.markdown("""
+        <style>
+        /* Dark theme */
+        .stApp, [data-testid="stSidebar"], [data-testid="stHeader"] {
+            background-color: #1a1a2e !important;
+            color: #eaeaea !important;
+        }
+        .stApp * {
+            color: #eaeaea !important;
+        }
+        [data-testid="stSidebar"] {
+            background-color: #16213e !important;
+        }
+        .stTabs [data-baseweb="tab-list"] {
+            background-color: #1a1a2e !important;
+        }
+        .stTabs [data-baseweb="tab"] {
+            color: #eaeaea !important;
+        }
+        [data-testid="stMetric"] {
+            background-color: #16213e !important;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .stDataFrame, [data-testid="stDataFrame"] {
+            background-color: #16213e !important;
+        }
+        .stMarkdown a {
+            color: #818cf8 !important;
+        }
+        /* Input fields */
+        input, [data-baseweb="input"], [data-baseweb="select"] > div,
+        .stTextInput > div > div, .stNumberInput > div > div,
+        .stDateInput > div > div, .stSelectbox > div > div {
+            background-color: #16213e !important;
+            color: #eaeaea !important;
+            border-color: #334155 !important;
+        }
+        .stMultiSelect > div > div {
+            background-color: #16213e !important;
+        }
+        [data-baseweb="popover"] {
+            background-color: #16213e !important;
+        }
+        [data-baseweb="menu"] {
+            background-color: #16213e !important;
+        }
+        [data-baseweb="menu"] li {
+            background-color: #16213e !important;
+        }
+        [data-baseweb="menu"] li:hover {
+            background-color: #1e3a5f !important;
+        }
+        /* Placeholder text */
+        input::placeholder, textarea::placeholder {
+            color: #64748b !important;
+            opacity: 1 !important;
+        }
+        /* Number input buttons */
+        .stNumberInput button {
+            background-color: #16213e !important;
+            color: #eaeaea !important;
+            border-color: #334155 !important;
+        }
+        /* Data table */
+        .stDataFrame, [data-testid="stDataFrame"],
+        .stDataFrame > div, [data-testid="stDataFrame"] > div,
+        .stDataFrame iframe, [data-testid="stDataFrame"] iframe {
+            background-color: #16213e !important;
+        }
+        [data-testid="stDataFrameResizable"] {
+            background-color: #16213e !important;
+        }
+        /* Download button */
+        .stDownloadButton button {
+            background-color: #16213e !important;
+            color: #eaeaea !important;
+            border: 1px solid #334155 !important;
+        }
+        .stDownloadButton button:hover {
+            background-color: #1e3a5f !important;
+            border-color: #6366f1 !important;
+        }
+        /* Dialog/Modal styling */
+        [data-testid="stModal"] > div:first-child {
+            background-color: rgba(0, 0, 0, 0.7) !important;
+        }
+        [data-testid="stModal"] > div > div {
+            background-color: #1a1a2e !important;
+            border: 1px solid #334155 !important;
+        }
+        [data-testid="stModal"] [data-testid="stMarkdownContainer"] {
+            color: #eaeaea !important;
+        }
+        [data-testid="stModal"] h1, [data-testid="stModal"] h2,
+        [data-testid="stModal"] h3, [data-testid="stModal"] h4 {
+            color: #eaeaea !important;
+        }
+        [data-testid="stModal"] hr {
+            border-color: #334155 !important;
+        }
+        [data-testid="stModal"] a {
+            color: #818cf8 !important;
+        }
+        /* Info buttons in dark mode - brighter colors */
+        div[data-testid="stColumn"]:last-child button[kind="secondary"] {
+            background-color: #818cf8 !important;
+            border: 2px solid #a5b4fc !important;
+            box-shadow: 0 0 10px rgba(129, 140, 248, 0.6) !important;
+        }
+        div[data-testid="stColumn"]:last-child button[kind="secondary"]:hover {
+            background-color: #a5b4fc !important;
+            border-color: #c7d2fe !important;
+            box-shadow: 0 0 14px rgba(165, 180, 252, 0.8) !important;
+        }
+        div[data-testid="stColumn"]:last-child button[kind="secondary"] p {
+            color: white !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+    # Get dark_mode setting for charts
+    dark_mode = st.session_state.get('dark_mode', True)
 
     # ========== MAIN AREA ==========
     if not run_optimization and 'results' not in st.session_state:
@@ -501,66 +736,50 @@ def main():
 
         cols = st.columns([0.9, 0.1], vertical_alignment="center")
         cols[0].subheader("Efficient Frontier")
-        with cols[1].popover("ⓘ"):
-            st.markdown("""
-            **What is the Efficient Frontier?**
-
-            The curved line shows the best possible portfolios — those that give you
-            the highest return for each level of risk.
-
-            - **Points on the line**: Optimal combinations of stocks
-            - **Points below the line**: Less efficient (you could do better!)
-            - **Star**: Your optimal portfolio (highest Sharpe ratio)
-            - **Diamond**: Equal-weight portfolio (same % in each stock)
-            """)
+        if cols[1].button("ⓘ", key="info_frontier"):
+            show_frontier_info()
         st.plotly_chart(
             plot_efficient_frontier(
                 results['efficient_df'],
                 results['individual_df'],
                 optimal=(results['opt_volatility'], results['opt_return'], results['optimal_weights']),
                 equal_weight=(results['eq_volatility'], results['eq_return']),
-                tickers=results['ticker_names']
+                tickers=results['ticker_names'],
+                dark_mode=dark_mode
             ),
             width="stretch"
         )
 
         cols = st.columns([0.9, 0.1], vertical_alignment="center")
         cols[0].subheader("Optimal Portfolio Allocation")
-        with cols[1].popover("ⓘ"):
-            st.markdown("""
-            **What is this showing?**
-
-            This pie chart shows how to divide your money across different stocks
-            to maximize your risk-adjusted return (Sharpe ratio).
-
-            - Larger slices = invest more in that stock
-            - Some stocks may have 0% — the optimizer chose to skip them
-            - The weights always add up to 100%
-            """)
+        if cols[1].button("ⓘ", key="info_allocation"):
+            show_allocation_info()
         # Stacked layout for mobile - pie chart first, then weights table
         st.plotly_chart(
-            plot_allocation_pie(results['optimal_weights'], results['ticker_names']),
+            plot_allocation_pie(results['optimal_weights'], results['ticker_names'], dark_mode=dark_mode),
             width="stretch"
         )
         st.markdown("**Weights:**")
-        # Create weights dataframe
+        # Create weights table as styled HTML for dark mode compatibility
         weights_data = []
         for ticker, weight in zip(results['ticker_names'], results['optimal_weights']):
             if weight > 0.001:
-                weights_data.append({
-                    'Ticker': ticker,
-                    'Weight': f"{weight*100:.2f}%"
-                })
-        weights_df = pd.DataFrame(weights_data)
-        st.dataframe(
-            weights_df,
-            hide_index=True,
-            width="stretch",
-            column_config={
-                'Ticker': st.column_config.TextColumn('Ticker', width='small'),
-                'Weight': st.column_config.TextColumn('Weight', width='small')
-            }
-        )
+                weights_data.append((ticker, f"{weight*100:.2f}%"))
+
+        if dark_mode:
+            table_style = "background-color: #16213e; color: #eaeaea; border-collapse: collapse; width: 100%;"
+            header_style = "background-color: #1e3a5f; padding: 8px; text-align: left; border-bottom: 1px solid #334155;"
+            cell_style = "padding: 8px; border-bottom: 1px solid #334155;"
+        else:
+            table_style = "background-color: white; border-collapse: collapse; width: 100%;"
+            header_style = "background-color: #f8fafc; padding: 8px; text-align: left; border-bottom: 1px solid #e5e7eb;"
+            cell_style = "padding: 8px; border-bottom: 1px solid #e5e7eb;"
+
+        table_html = f'<table style="{table_style}"><thead><tr><th style="{header_style}">Ticker</th><th style="{header_style}">Weight</th></tr></thead><tbody>'
+        for ticker, weight in weights_data:
+            table_html += f'<tr><td style="{cell_style}">{ticker}</td><td style="{cell_style}">{weight}</td></tr>'
+        table_html += '</tbody></table>'
+        st.markdown(table_html, unsafe_allow_html=True)
 
         # Create zip file with all CSV exports
         zip_buffer = io.BytesIO()
@@ -602,78 +821,38 @@ def main():
 
         cols = st.columns([0.9, 0.1], vertical_alignment="center")
         cols[0].subheader("Risk vs Return")
-        with cols[1].popover("ⓘ"):
-            st.markdown("""
-            **Understanding Risk vs Return**
-
-            This chart compares the expected return and volatility (risk) of each asset.
-
-            - **Return**: How much you might earn per year (higher = better)
-            - **Volatility**: How much the price swings up and down (lower = safer)
-            - Ideally, you want high return with low volatility
-            """)
+        if cols[1].button("ⓘ", key="info_risk_return"):
+            show_risk_return_info()
         st.plotly_chart(
-            plot_risk_return_bars(results['comparison_df']),
+            plot_risk_return_bars(results['comparison_df'], dark_mode=dark_mode),
             width="stretch"
         )
 
         cols = st.columns([0.9, 0.1], vertical_alignment="center")
         cols[0].subheader("Sharpe Ratio Comparison")
-        with cols[1].popover("ⓘ"):
-            st.markdown("""
-            **What is the Sharpe Ratio?**
-
-            The Sharpe ratio measures return per unit of risk — like "miles per gallon"
-            for investments.
-
-            - **Above 1.0**: Good risk-adjusted return
-            - **Above 2.0**: Very good
-            - **Below 0**: You'd be better off in a savings account!
-
-            The dashed line marks Sharpe = 1.0 as a reference.
-            """)
+        if cols[1].button("ⓘ", key="info_sharpe"):
+            show_sharpe_info()
         st.plotly_chart(
-            plot_sharpe_comparison(results['comparison_df']),
+            plot_sharpe_comparison(results['comparison_df'], dark_mode=dark_mode),
             width="stretch"
         )
 
     with tab3:
         cols = st.columns([0.9, 0.1], vertical_alignment="center")
         cols[0].subheader("Price History")
-        with cols[1].popover("ⓘ"):
-            st.markdown("""
-            **Reading the Price History**
-
-            All stocks are normalized to start at 100, making it easy to compare
-            their performance over time.
-
-            - **Line going up**: Stock gained value
-            - **Line going down**: Stock lost value
-            - **Steeper line**: Faster gains or losses
-            - **Wiggly line**: More volatile (riskier)
-            """)
+        if cols[1].button("ⓘ", key="info_price"):
+            show_price_info()
         st.plotly_chart(
-            plot_price_history(results['prices']),
+            plot_price_history(results['prices'], dark_mode=dark_mode),
             width="stretch"
         )
 
         cols = st.columns([0.9, 0.1], vertical_alignment="center")
         cols[0].subheader("Correlation Matrix")
-        with cols[1].popover("ⓘ"):
-            st.markdown("""
-            **What is Correlation?**
-
-            Correlation shows how stocks move together, from -1 to +1.
-
-            - **+1 (red)**: Stocks move in the same direction
-            - **0 (white)**: No relationship
-            - **-1 (blue)**: Stocks move in opposite directions
-
-            For diversification, you want stocks with low correlation — when one
-            goes down, another might go up!
-            """)
+        if cols[1].button("ⓘ", key="info_correlation"):
+            show_correlation_info()
         st.plotly_chart(
-            plot_correlation_heatmap(results['correlation']),
+            plot_correlation_heatmap(results['correlation'], dark_mode=dark_mode),
             width="stretch"
         )
 
