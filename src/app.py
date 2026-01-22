@@ -843,12 +843,15 @@ def main():
         )
 
     with tab2:
-        # Color legend
-        st.caption(
-            ":blue-background[Individual Stocks]  "
-            ":orange-background[Optimal Portfolio]  "
-            ":green-background[Equal-Weight]  "
-            ":violet-background[Benchmarks]"
+        # Color legend matching chart colors
+        st.markdown(
+            '<span style="font-size: 0.875rem;">'
+            '<span style="background-color: #5BA3C6; color: white; padding: 2px 8px; border-radius: 4px; margin-right: 8px;">Individual Stocks</span>'
+            '<span style="background-color: #DAA520; color: white; padding: 2px 8px; border-radius: 4px; margin-right: 8px;">Optimal Portfolio</span>'
+            '<span style="background-color: #228B22; color: white; padding: 2px 8px; border-radius: 4px; margin-right: 8px;">Equal-Weight</span>'
+            '<span style="background-color: #7B5CB8; color: white; padding: 2px 8px; border-radius: 4px;">Benchmarks</span>'
+            '</span>',
+            unsafe_allow_html=True
         )
 
         cols = st.columns([0.9, 0.1], vertical_alignment="center")
