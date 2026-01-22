@@ -470,6 +470,7 @@ def main():
             background-color: #16213e !important;
             color: #eaeaea !important;
             border-color: #334155 !important;
+            caret-color: #eaeaea !important;
         }
         .stMultiSelect > div > div {
             background-color: #16213e !important;
