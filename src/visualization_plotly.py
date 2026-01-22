@@ -215,6 +215,21 @@ def plot_allocation_pie(weights: np.ndarray, tickers: list[str]) -> go.Figure:
     return fig
 
 
+def _get_bar_colors(comparison_df: pd.DataFrame) -> list[str]:
+    """Generate colors for bar charts based on asset type."""
+    colors = []
+    for asset in comparison_df['Asset']:
+        if asset == 'Optimal':
+            colors.append('#FFD700')  # Gold
+        elif asset == 'Equal-Weight':
+            colors.append('#32CD32')  # Green
+        elif asset in ('S&P 500', 'Nasdaq 100'):
+            colors.append('#9370DB')  # Purple for benchmarks
+        else:
+            colors.append('#87CEEB')  # Light blue for stocks
+    return colors
+
+
 def plot_risk_return_bars(comparison_df: pd.DataFrame) -> go.Figure:
     """Create grouped bar charts comparing returns and volatility.
 
@@ -224,8 +239,7 @@ def plot_risk_return_bars(comparison_df: pd.DataFrame) -> go.Figure:
     Returns:
         Plotly Figure object.
     """
-    num_assets = len(comparison_df) - 2  # Subtract optimal and equal-weight
-    colors = ['#87CEEB'] * num_assets + ['#FFD700', '#32CD32']
+    colors = _get_bar_colors(comparison_df)
 
     fig = go.Figure()
 
@@ -268,8 +282,7 @@ def plot_sharpe_comparison(comparison_df: pd.DataFrame) -> go.Figure:
     Returns:
         Plotly Figure object.
     """
-    num_assets = len(comparison_df) - 2
-    colors = ['#87CEEB'] * num_assets + ['#FFD700', '#32CD32']
+    colors = _get_bar_colors(comparison_df)
 
     fig = go.Figure()
 
