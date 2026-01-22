@@ -19,6 +19,11 @@ def _get_layout_colors(dark_mode: bool = False):
             'font_color': '#eaeaea',
             'text_color': '#eaeaea',
             'gridcolor': '#334155',
+            'hoverlabel': {
+                'bgcolor': '#1e293b',
+                'bordercolor': '#475569',
+                'font': {'color': '#eaeaea'}
+            },
         }
     else:
         return {
@@ -28,6 +33,11 @@ def _get_layout_colors(dark_mode: bool = False):
             'font_color': '#1f2937',
             'text_color': '#475569',
             'gridcolor': '#e5e7eb',
+            'hoverlabel': {
+                'bgcolor': 'white',
+                'bordercolor': '#e5e7eb',
+                'font': {'color': '#1f2937'}
+            },
         }
 
 
@@ -55,6 +65,7 @@ def plot_correlation_heatmap(correlation: pd.DataFrame, dark_mode: bool = False)
         paper_bgcolor=colors['paper_bgcolor'],
         plot_bgcolor=colors['plot_bgcolor'],
         font_color=colors['font_color'],
+        hoverlabel=colors['hoverlabel'],
         xaxis_title='',
         yaxis_title='',
         height=450
@@ -93,6 +104,7 @@ def plot_price_history(prices: pd.DataFrame, dark_mode: bool = False) -> go.Figu
         paper_bgcolor=colors['paper_bgcolor'],
         plot_bgcolor=colors['plot_bgcolor'],
         font_color=colors['font_color'],
+        hoverlabel=colors['hoverlabel'],
         xaxis_title='Date',
         yaxis_title='Normalized Price',
         hovermode='x unified',
@@ -214,6 +226,7 @@ def plot_efficient_frontier(
         paper_bgcolor=colors['paper_bgcolor'],
         plot_bgcolor=colors['plot_bgcolor'],
         font_color=colors['font_color'],
+        hoverlabel=colors['hoverlabel'],
         xaxis_title='Annual Volatility (Risk) %',
         yaxis_title='Annual Return %',
         height=450,
@@ -267,6 +280,7 @@ def plot_allocation_pie(weights: np.ndarray, tickers: list[str], dark_mode: bool
         template=colors['template'],
         paper_bgcolor=colors['paper_bgcolor'],
         font_color=colors['font_color'],
+        hoverlabel=colors['hoverlabel'],
         height=450
     )
     return fig
@@ -326,6 +340,7 @@ def plot_risk_return_bars(comparison_df: pd.DataFrame, dark_mode: bool = False) 
         paper_bgcolor=layout_colors['paper_bgcolor'],
         plot_bgcolor=layout_colors['plot_bgcolor'],
         font_color=layout_colors['font_color'],
+        hoverlabel=layout_colors['hoverlabel'],
         xaxis_title='Asset',
         yaxis_title='Percentage (%)',
         barmode='group',
@@ -378,6 +393,7 @@ def plot_sharpe_comparison(comparison_df: pd.DataFrame, dark_mode: bool = False)
         paper_bgcolor=layout_colors['paper_bgcolor'],
         plot_bgcolor=layout_colors['plot_bgcolor'],
         font_color=layout_colors['font_color'],
+        hoverlabel=layout_colors['hoverlabel'],
         xaxis_title='Asset',
         yaxis_title='Sharpe Ratio',
         height=450

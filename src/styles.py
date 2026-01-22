@@ -17,28 +17,25 @@ button[kind="secondary"]:has(p:only-child:not(:empty)) {
     container-type: inline-size;
 }
 div[data-testid="stColumn"]:last-child button[kind="secondary"] {
-    background-color: #6366f1 !important;
-    color: white !important;
+    background-color: transparent !important;
+    color: #94a3b8 !important;
     border: none !important;
-    border-radius: 50% !important;
-    width: 32px !important;
-    height: 32px !important;
     padding: 0 !important;
     min-height: 0 !important;
 }
 div[data-testid="stColumn"]:last-child button[kind="secondary"]:hover {
-    background-color: #4f46e5 !important;
+    background-color: transparent !important;
+    color: #6366f1 !important;
 }
 div[data-testid="stColumn"]:last-child button[kind="secondary"] p {
-    font-size: 16px !important;
-    color: white !important;
+    font-size: 18px !important;
+    color: inherit !important;
 }
-/* Align title info button with title text */
-div[data-testid="stVerticalBlock"] > div:first-child div[data-testid="stColumn"]:last-child {
+/* Align all info buttons with their headers - left aligned, inline */
+div[data-testid="stColumn"]:last-child:has(button[kind="secondary"]) {
     display: flex !important;
-    align-items: flex-end !important;
-    justify-content: flex-end !important;
-    padding-bottom: 0.75rem !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
 }
 
 /* Make multiselect X button larger for mobile tappability */
@@ -56,6 +53,76 @@ div[data-testid="stVerticalBlock"] > div:first-child div[data-testid="stColumn"]
     align-items: center !important;
     justify-content: center !important;
 }
+
+/* Documentation link */
+.doc-link {
+    color: #6366f1 !important;
+    font-weight: 600;
+    text-decoration: none !important;
+}
+.doc-link:hover {
+    text-decoration: underline !important;
+}
+
+/* Sidebar toggle button - prominent when collapsed */
+[data-testid="collapsedControl"] button {
+    background-color: #6366f1 !important;
+    color: white !important;
+    border-radius: 8px !important;
+    padding: 8px !important;
+}
+[data-testid="collapsedControl"] button:hover {
+    background-color: #4f46e5 !important;
+}
+[data-testid="collapsedControl"] svg {
+    stroke: white !important;
+    width: 20px !important;
+    height: 20px !important;
+}
+/* Sidebar collapse button - always visible when expanded */
+[data-testid="stSidebar"] button[data-testid="stBaseButton-headerNoPadding"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Prominent floating tabs */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+    background: transparent;
+    padding: 0;
+}
+.stTabs [data-baseweb="tab"] {
+    background-color: transparent;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #64748b;
+    letter-spacing: 0.01em;
+    transition: all 0.2s ease;
+    border: 2px solid #e2e8f0;
+}
+.stTabs [data-baseweb="tab"]:hover {
+    color: #475569;
+    border-color: #cbd5e1;
+    background-color: #f8fafc;
+}
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+    color: white !important;
+    font-weight: 600;
+    border-color: transparent !important;
+}
+.stTabs [data-baseweb="tab-highlight"] {
+    display: none;
+}
+.stTabs [data-baseweb="tab-border"] {
+    display: none;
+}
 """
 
 # Dark theme CSS
@@ -71,11 +138,21 @@ DARK_THEME_CSS = """
 [data-testid="stSidebar"] {
     background-color: #16213e !important;
 }
+/* Dark mode tabs */
 .stTabs [data-baseweb="tab-list"] {
-    background-color: #1a1a2e !important;
+    background: transparent !important;
 }
 .stTabs [data-baseweb="tab"] {
-    color: #eaeaea !important;
+    border-color: #334155 !important;
+    color: #94a3b8 !important;
+}
+.stTabs [data-baseweb="tab"]:hover {
+    border-color: #475569 !important;
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    color: #e2e8f0 !important;
+}
+.stTabs [aria-selected="true"] {
+    box-shadow: none !important;
 }
 [data-testid="stMetric"] {
     background-color: #16213e !important;
@@ -87,6 +164,13 @@ DARK_THEME_CSS = """
 }
 .stMarkdown a {
     color: #818cf8 !important;
+}
+.doc-link {
+    color: #a5b4fc !important;
+    text-decoration: none !important;
+}
+.doc-link:hover {
+    text-decoration: underline !important;
 }
 
 /* Input fields */
@@ -190,19 +274,26 @@ div[data-modal-container="true"] > div > div,
     color: #eaeaea !important;
 }
 
-/* Info buttons in dark mode - brighter colors */
-div[data-testid="stColumn"]:last-child button[kind="secondary"] {
+/* Sidebar toggle in dark mode - prominent when collapsed */
+[data-testid="collapsedControl"] button {
+    background-color: #818cf8 !important;
+}
+[data-testid="collapsedControl"] button:hover {
     background-color: #a5b4fc !important;
-    border: 2px solid #c7d2fe !important;
-    box-shadow: 0 0 12px rgba(165, 180, 252, 0.7) !important;
+}
+/* Sidebar collapse button always visible in dark mode */
+[data-testid="stSidebar"] button[data-testid="stBaseButton-headerNoPadding"],
+[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Info buttons in dark mode */
+div[data-testid="stColumn"]:last-child button[kind="secondary"] {
+    color: #64748b !important;
 }
 div[data-testid="stColumn"]:last-child button[kind="secondary"]:hover {
-    background-color: #c7d2fe !important;
-    border-color: #e0e7ff !important;
-    box-shadow: 0 0 16px rgba(199, 210, 254, 0.9) !important;
-}
-div[data-testid="stColumn"]:last-child button[kind="secondary"] p {
-    color: #1e1b4b !important;
+    color: #818cf8 !important;
 }
 
 /* Tooltip/help popover in dark mode */

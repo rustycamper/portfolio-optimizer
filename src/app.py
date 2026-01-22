@@ -210,14 +210,21 @@ def show_about_dialog():
 
 
 def main():
-    cols = st.columns([0.9, 0.1], vertical_alignment="center")
-    cols[0].title("Portfolio Optimizer")
-    if cols[1].button("ⓘ", help="About this app"):
-        show_about_dialog()
+    col1, col2 = st.columns([20, 1], vertical_alignment="center", gap="small")
+    with col1:
+        st.markdown("<h1 style='margin-bottom: 0;'>Portfolio Optimizer</h1>", unsafe_allow_html=True)
+    with col2:
+        if st.button("ⓘ", key="info_about", help="About this app"):
+            show_about_dialog()
     st.caption("An educational app built by Lilly and [Claude Code](https://claude.ai/code)")
     st.markdown(
         "Discover how to build a smart investment portfolio using **Modern Portfolio Theory** (MPT) — "
         "a Nobel Prize-winning approach to balancing risk and reward."
+    )
+    st.markdown(
+        '<a href="https://github.com/rustycamper/portfolio-optimizer/blob/main/Portfolio_Optimization_Documentation.pdf" '
+        'target="_blank" class="doc-link">Read the Full Documentation (PDF) for the math behind it</a>',
+        unsafe_allow_html=True
     )
 
     # ========== SIDEBAR ==========
@@ -229,8 +236,8 @@ def main():
         # Initialize session state for custom tickers and selected tickers
         if 'custom_tickers' not in st.session_state:
             st.session_state.custom_tickers = []
-        if 'selected_tickers' not in st.session_state:
-            st.session_state.selected_tickers = TICKERS.copy()
+        if 'ticker_multiselect' not in st.session_state:
+            st.session_state.ticker_multiselect = TICKERS.copy()
         if 'last_preset' not in st.session_state:
             st.session_state.last_preset = "Custom"
 
@@ -250,9 +257,7 @@ def main():
         if selected_preset != st.session_state.last_preset:
             st.session_state.last_preset = selected_preset
             if selected_preset != "Custom":
-                st.session_state.selected_tickers = PRESET_PORTFOLIOS[selected_preset].copy()
-                # Also update the widget's key state directly
-                st.session_state.ticker_multiselect = st.session_state.selected_tickers.copy()
+                st.session_state.ticker_multiselect = PRESET_PORTFOLIOS[selected_preset].copy()
 
         # Add custom ticker input first (before multiselect) so callback can update state
         if 'ticker_input' not in st.session_state:
@@ -264,7 +269,7 @@ def main():
             ticker = st.session_state.ticker_input.upper().strip()
             if not ticker:
                 return
-            if ticker in st.session_state.selected_tickers:
+            if ticker in st.session_state.ticker_multiselect:
                 st.toast(f":orange[**{ticker}** is already selected]", icon=":material/info:")
             elif ticker in available_tickers:
                 # Already in dropdown - add to selection
@@ -280,11 +285,8 @@ def main():
 
         # Process pending ticker addition
         if st.session_state.pending_ticker:
-            if st.session_state.pending_ticker not in st.session_state.selected_tickers:
-                st.session_state.selected_tickers.append(st.session_state.pending_ticker)
-                # Also update widget key if it exists
-                if 'ticker_multiselect' in st.session_state:
-                    st.session_state.ticker_multiselect = st.session_state.selected_tickers.copy()
+            if st.session_state.pending_ticker not in st.session_state.ticker_multiselect:
+                st.session_state.ticker_multiselect = st.session_state.ticker_multiselect + [st.session_state.pending_ticker]
             st.session_state.pending_ticker = None
 
         # Recalculate available tickers (may have changed if custom ticker was added)
@@ -293,13 +295,9 @@ def main():
         selected_tickers = st.multiselect(
             "Select stocks",
             options=available_tickers,
-            default=st.session_state.selected_tickers,
             key="ticker_multiselect",
             help="Pick at least 2 stocks. More stocks = more diversification!"
         )
-
-        # Keep session state in sync with widget (widget is source of truth for user interactions)
-        st.session_state.selected_tickers = selected_tickers
 
         st.text_input(
             "Add custom ticker",
@@ -349,7 +347,7 @@ def main():
             step=1,
             disabled=not use_min_weight,
             format="%d%%",
-            help="Forces every stock to have at least this much. Ensures no stock is ignored."
+            help="If set to 5%, you must put at least 5% of your money in each stock you selected — no stock gets skipped."
         )
         min_weight = min_weight_pct / 100
 
@@ -380,6 +378,7 @@ def main():
             st.error("Oops! Start date needs to be before end date.")
             has_errors = True
 
+        st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
         run_optimization = st.button(
             "Run Optimization",
             type="primary",
@@ -388,14 +387,15 @@ def main():
         )
 
         # Theme toggle at the bottom
-        st.divider()
+        st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
         if 'dark_mode' not in st.session_state:
             st.session_state.dark_mode = True  # Dark mode is default
         # Read from toggle key if it exists (updated immediately on toggle), else use dark_mode
         current_mode = st.session_state.get('dark_mode_toggle', st.session_state.dark_mode)
         theme_icon = "🌙" if current_mode else "☀️"
+        theme_label = "Dark" if current_mode else "Light"
         dark_mode = st.toggle(
-            f"{theme_icon} Theme",
+            f"{theme_icon} {theme_label}",
             value=st.session_state.dark_mode,
             key="dark_mode_toggle",
             help="Toggle between dark and light mode"
@@ -408,7 +408,7 @@ def main():
 
     # ========== MAIN AREA ==========
     if not run_optimization and 'results' not in st.session_state:
-        st.info("👈 Pick your stocks in the sidebar, then click **Run Optimization** to see the magic happen!")
+        st.info("👈  Pick your stocks in the sidebar, then click **Run Optimization** to see the magic happen!")
         return
 
     if run_optimization:
@@ -583,7 +583,7 @@ def main():
                 help="Return per unit of risk — like miles per gallon for investments. Above 1 is good, above 2 is great!"
             )
 
-        cols = st.columns([0.9, 0.1], vertical_alignment="center")
+        cols = st.columns([20, 1], vertical_alignment="center", gap="small")
         cols[0].subheader("Efficient Frontier")
         if cols[1].button("ⓘ", key="info_frontier"):
             show_frontier_info()
@@ -599,7 +599,7 @@ def main():
             width="stretch"
         )
 
-        cols = st.columns([0.9, 0.1], vertical_alignment="center")
+        cols = st.columns([20, 1], vertical_alignment="center", gap="small")
         cols[0].subheader("Optimal Portfolio Allocation")
         if cols[1].button("ⓘ", key="info_allocation"):
             show_allocation_info()
@@ -671,7 +671,7 @@ def main():
             unsafe_allow_html=True
         )
 
-        cols = st.columns([0.9, 0.1], vertical_alignment="center")
+        cols = st.columns([20, 1], vertical_alignment="center", gap="small")
         cols[0].subheader("Risk vs Return")
         if cols[1].button("ⓘ", key="info_risk_return"):
             show_risk_return_info()
@@ -680,7 +680,7 @@ def main():
             width="stretch"
         )
 
-        cols = st.columns([0.9, 0.1], vertical_alignment="center")
+        cols = st.columns([20, 1], vertical_alignment="center", gap="small")
         cols[0].subheader("Sharpe Ratio Comparison")
         if cols[1].button("ⓘ", key="info_sharpe"):
             show_sharpe_info()
@@ -690,7 +690,7 @@ def main():
         )
 
     with tab3:
-        cols = st.columns([0.9, 0.1], vertical_alignment="center")
+        cols = st.columns([20, 1], vertical_alignment="center", gap="small")
         cols[0].subheader("Price History")
         if cols[1].button("ⓘ", key="info_price"):
             show_price_info()
@@ -699,7 +699,7 @@ def main():
             width="stretch"
         )
 
-        cols = st.columns([0.9, 0.1], vertical_alignment="center")
+        cols = st.columns([20, 1], vertical_alignment="center", gap="small")
         cols[0].subheader("Correlation Matrix")
         if cols[1].button("ⓘ", key="info_correlation"):
             show_correlation_info()
