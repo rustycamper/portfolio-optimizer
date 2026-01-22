@@ -32,6 +32,29 @@ st.set_page_config(
     layout="centered"  # Better mobile default
 )
 
+# Custom CSS for info buttons
+st.markdown("""
+<style>
+/* Style info buttons and popovers */
+button[kind="secondary"]:has(p:only-child) {
+    background-color: #6366f1 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 50% !important;
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+}
+button[kind="secondary"]:has(p:only-child):hover {
+    background-color: #4f46e5 !important;
+}
+button[kind="secondary"]:has(p:only-child) p {
+    font-size: 16px !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # Preset portfolio configurations
 PRESET_PORTFOLIOS = {
     "Custom": [],
@@ -90,32 +113,54 @@ def get_benchmark_stats(start: str, end: str, risk_free_rate: float) -> dict:
     return benchmarks
 
 
+@st.dialog("About This App", width="large")
+def show_about_dialog():
+    st.markdown("""
+    <style>
+    div[data-modal-container="true"] > div:first-child {
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    st.markdown("""
+    ### Welcome!
+    This app helps you understand how professional investors build portfolios.
+
+    ---
+
+    ### Key concepts you'll explore
+
+    - **Diversification**: Don't put all your eggs in one basket — spreading investments reduces risk
+    - **Risk vs Return**: Higher potential returns usually come with higher risk
+    - **Sharpe Ratio**: A score that measures how much return you get for the risk you take (higher = better)
+    - **Efficient Frontier**: The "sweet spot" portfolios that give you the best return for each level of risk
+
+    ---
+
+    ### How to use
+
+    1. Pick some stocks in the sidebar (or use a preset portfolio)
+    2. Click "Run Optimization"
+    3. Explore the interactive charts!
+
+    ---
+
+    📚 [Read the full documentation (PDF)](https://github.com/rustycamper/portfolio-optimizer/blob/main/Portfolio_Optimization_Documentation.pdf) for the math behind the scenes.
+
+    *Built by Lilly and Claude Code as an educational project.*
+    """)
+
+
 def main():
-    st.title("Portfolio Optimizer — Learn to Invest Smarter")
+    cols = st.columns([0.93, 0.07], vertical_alignment="center")
+    cols[0].title("Portfolio Optimizer")
+    if cols[1].button("ⓘ", help="About this app"):
+        show_about_dialog()
     st.caption("An educational app built by Lilly and [Claude Code](https://claude.ai/code)")
     st.markdown(
         "Discover how to build a smart investment portfolio using **Modern Portfolio Theory** (MPT) — "
         "a Nobel Prize-winning approach to balancing risk and reward."
     )
-    with st.expander("What is this app?", expanded=False):
-        st.markdown("""
-        **Welcome!** This app helps you understand how professional investors build portfolios.
-
-        **Key concepts you'll explore:**
-        - **Diversification**: Don't put all your eggs in one basket — spreading investments reduces risk
-        - **Risk vs Return**: Higher potential returns usually come with higher risk
-        - **Sharpe Ratio**: A score that measures how much return you get for the risk you take (higher = better)
-        - **Efficient Frontier**: The "sweet spot" portfolios that give you the best return for each level of risk
-
-        **How to use:**
-        1. Pick some stocks in the sidebar (or use a preset portfolio)
-        2. Click "Run Optimization"
-        3. Explore the interactive charts!
-
-        📚 [Read the full documentation (PDF)](https://github.com/rustycamper/portfolio-optimizer/blob/main/Portfolio_Optimization_Documentation.pdf) for the math behind the scenes.
-
-        *Built by Lilly and Claude Code as an educational project.*
-        """)
 
     # ========== SIDEBAR ==========
     with st.sidebar:
