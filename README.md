@@ -1,12 +1,10 @@
 # Portfolio Optimizer
 
-Portfolio optimization tool implementing Modern Portfolio Theory (MPT).
+> **Try it now: [portfolio-optimizer-lilly.streamlit.app](https://portfolio-optimizer-lilly.streamlit.app/)**
+
+An educational app to learn portfolio optimization using Modern Portfolio Theory (MPT) — built by Lilly and Claude Code.
 
 For a detailed explanation of the math and methodology, see [Portfolio_Optimization_Documentation.pdf](Portfolio_Optimization_Documentation.pdf).
-
-## Live Demo
-
-Try the interactive web app: **[Portfolio Optimizer on Streamlit](https://your-app-name.streamlit.app)** *(update link after deployment)*
 
 ## Features
 - Downloads historical stock data via Yahoo Finance
@@ -87,12 +85,11 @@ Results are saved to `src/output/`:
 
 ## Deployment
 
-Deploy to Streamlit Cloud for free:
+This app is deployed on Streamlit Cloud at [portfolio-optimizer-lilly.streamlit.app](https://portfolio-optimizer-lilly.streamlit.app/).
 
-1. Push the repository to GitHub
+To deploy your own instance:
+1. Fork this repository
 2. Go to [share.streamlit.io](https://share.streamlit.io)
 3. Connect your GitHub repository
 4. Set main file path: `src/app.py`
 5. Deploy
-
-The app will be available at `https://your-app-name.streamlit.app`
