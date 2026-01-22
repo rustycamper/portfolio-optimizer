@@ -26,7 +26,7 @@ from visualization_plotly import (
 st.set_page_config(
     page_title="Portfolio Optimizer",
     page_icon="📈",
-    layout="wide"
+    layout="centered"  # Better mobile default
 )
 
 # Preset portfolio configurations
@@ -94,7 +94,7 @@ def main():
         "Discover how to build a smart investment portfolio using **Modern Portfolio Theory** (MPT) — "
         "a Nobel Prize-winning approach to balancing risk and reward."
     )
-    with st.expander("What is this app? (click to learn more)"):
+    with st.expander("What is this app?", expanded=False):
         st.markdown("""
         **Welcome!** This app helps you understand how professional investors build portfolios.
 
@@ -432,24 +432,11 @@ def main():
             st.warning("Settings have changed. Click **Run Optimization** to update results.", icon=":material/sync:")
 
     # Tabs for different views
-    tab1, tab2, tab3 = st.tabs(["Price History", "Optimization", "Comparison"])
+    tab1, tab2, tab3 = st.tabs(["Optimization", "Comparison", "Price History"])
 
     with tab1:
-        st.subheader("Price History")
-        st.plotly_chart(
-            plot_price_history(results['prices']),
-            use_container_width=True
-        )
-
-        st.subheader("Correlation Matrix")
-        st.plotly_chart(
-            plot_correlation_heatmap(results['correlation']),
-            use_container_width=True
-        )
-
-    with tab2:
         # Portfolio metrics
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3 = st.columns(3, gap="small")
         with col1:
             st.metric(
                 "Expected Return",
@@ -486,50 +473,48 @@ def main():
         )
 
         st.subheader("Optimal Portfolio Allocation")
-        col1, col2 = st.columns([2, 1])
-        with col1:
-            st.plotly_chart(
-                plot_allocation_pie(results['optimal_weights'], results['ticker_names']),
-                use_container_width=True
-            )
-        with col2:
-            st.markdown("**Weights:**")
-            # Create weights dataframe
-            weights_data = []
-            for ticker, weight in zip(results['ticker_names'], results['optimal_weights']):
-                if weight > 0.001:
-                    weights_data.append({
-                        'Ticker': ticker,
-                        'Weight': f"{weight*100:.2f}%"
-                    })
-            weights_df = pd.DataFrame(weights_data)
-            st.dataframe(
-                weights_df,
-                hide_index=True,
-                use_container_width=True,
-                column_config={
-                    'Ticker': st.column_config.TextColumn('Ticker', width='small'),
-                    'Weight': st.column_config.TextColumn('Weight', width='small')
-                }
-            )
+        # Stacked layout for mobile - pie chart first, then weights table
+        st.plotly_chart(
+            plot_allocation_pie(results['optimal_weights'], results['ticker_names']),
+            use_container_width=True
+        )
+        st.markdown("**Weights:**")
+        # Create weights dataframe
+        weights_data = []
+        for ticker, weight in zip(results['ticker_names'], results['optimal_weights']):
+            if weight > 0.001:
+                weights_data.append({
+                    'Ticker': ticker,
+                    'Weight': f"{weight*100:.2f}%"
+                })
+        weights_df = pd.DataFrame(weights_data)
+        st.dataframe(
+            weights_df,
+            hide_index=True,
+            use_container_width=True,
+            column_config={
+                'Ticker': st.column_config.TextColumn('Ticker', width='small'),
+                'Weight': st.column_config.TextColumn('Weight', width='small')
+            }
+        )
 
-            # Download button
-            csv_data = pd.DataFrame({
-                'Ticker': results['ticker_names'],
-                'Weight': results['optimal_weights'],
-                'Weight_Percent': results['optimal_weights'] * 100
-            }).to_csv(index=False)
+        # Download button
+        csv_data = pd.DataFrame({
+            'Ticker': results['ticker_names'],
+            'Weight': results['optimal_weights'],
+            'Weight_Percent': results['optimal_weights'] * 100
+        }).to_csv(index=False)
 
-            st.download_button(
-                label="Download CSV",
-                data=csv_data,
-                file_name="optimal_portfolio_weights.csv",
-                mime="text/csv",
-                icon=":material/download:",
-                use_container_width=True
-            )
+        st.download_button(
+            label="Download CSV",
+            data=csv_data,
+            file_name="optimal_portfolio_weights.csv",
+            mime="text/csv",
+            icon=":material/download:",
+            use_container_width=True
+        )
 
-    with tab3:
+    with tab2:
         # Color legend
         st.caption(
             ":blue-background[Individual Stocks]  "
@@ -547,6 +532,19 @@ def main():
         st.subheader("Sharpe Ratio Comparison")
         st.plotly_chart(
             plot_sharpe_comparison(results['comparison_df']),
+            use_container_width=True
+        )
+
+    with tab3:
+        st.subheader("Price History")
+        st.plotly_chart(
+            plot_price_history(results['prices']),
+            use_container_width=True
+        )
+
+        st.subheader("Correlation Matrix")
+        st.plotly_chart(
+            plot_correlation_heatmap(results['correlation']),
             use_container_width=True
         )
 

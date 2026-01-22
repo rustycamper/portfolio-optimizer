@@ -30,7 +30,7 @@ def plot_correlation_heatmap(correlation: pd.DataFrame) -> go.Figure:
         title='Stock Correlation Matrix',
         xaxis_title='',
         yaxis_title='',
-        height=500
+        height=450
     )
     return fig
 
@@ -64,10 +64,10 @@ def plot_price_history(prices: pd.DataFrame) -> go.Figure:
         xaxis_title='Date',
         yaxis_title='Normalized Price',
         hovermode='x unified',
-        height=500,
-        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
+        height=450,
+        legend=dict(orientation='h', yanchor='top', y=-0.15, xanchor='center', x=0.5)
     )
-    fig.update_xaxes(rangeslider_visible=True)
+    fig.update_xaxes(rangeslider_visible=False)
     return fig
 
 
@@ -173,8 +173,8 @@ def plot_efficient_frontier(
         title='Efficient Frontier - Portfolio Optimization',
         xaxis_title='Annual Volatility (Risk) %',
         yaxis_title='Annual Return %',
-        height=600,
-        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
+        height=450,
+        legend=dict(orientation='h', yanchor='top', y=-0.15, xanchor='center', x=0.5),
         hovermode='closest'
     )
     return fig
@@ -210,7 +210,7 @@ def plot_allocation_pie(weights: np.ndarray, tickers: list[str]) -> go.Figure:
 
     fig.update_layout(
         title='Optimal Portfolio Allocation',
-        height=500
+        height=450
     )
     return fig
 
@@ -267,9 +267,10 @@ def plot_risk_return_bars(comparison_df: pd.DataFrame) -> go.Figure:
         xaxis_title='Asset',
         yaxis_title='Percentage (%)',
         barmode='group',
-        height=500,
-        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
+        height=450,
+        legend=dict(orientation='h', yanchor='top', y=-0.2, xanchor='center', x=0.5)
     )
+    fig.update_xaxes(tickangle=-45)
     return fig
 
 
@@ -308,6 +309,7 @@ def plot_sharpe_comparison(comparison_df: pd.DataFrame) -> go.Figure:
         title='Sharpe Ratio Comparison (Higher is Better)',
         xaxis_title='Asset',
         yaxis_title='Sharpe Ratio',
-        height=500
+        height=450
     )
+    fig.update_xaxes(tickangle=-45)
     return fig
