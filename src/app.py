@@ -104,7 +104,14 @@ def show_frontier_info():
     - **Points below the line**: Less efficient (you could do better!)
     - **Star**: Your optimal portfolio (highest Sharpe ratio)
     - **Diamond**: Equal-weight portfolio (same % in each stock)
+
+    ---
+    **The Math:**
     """)
+    st.latex(r"R_p = \sum_{i=1}^{n} w_i \cdot R_i")
+    st.caption("Portfolio return = weighted sum of individual returns")
+    st.latex(r"\sigma_p = \sqrt{\sum_{i=1}^{n} \sum_{j=1}^{n} w_i w_j \sigma_{ij}}")
+    st.caption("Portfolio risk = based on weights and how stocks move together")
 
 
 @st.dialog("Portfolio Allocation")
@@ -116,7 +123,12 @@ def show_allocation_info():
     - Larger slices = invest more in that stock
     - Some stocks may have 0% — the optimizer chose to skip them
     - The weights always add up to 100%
+
+    ---
+    **The Math:**
     """)
+    st.latex(r"\max_{w} \frac{R_p - R_f}{\sigma_p} \quad \text{subject to} \quad \sum_{i=1}^{n} w_i = 1")
+    st.caption("Find weights that maximize Sharpe ratio, with weights summing to 100%")
 
 
 @st.dialog("Risk vs Return")
@@ -127,7 +139,14 @@ def show_risk_return_info():
     - **Return**: How much you might earn per year (higher = better)
     - **Volatility**: How much the price swings up and down (lower = safer)
     - Ideally, you want high return with low volatility
+
+    ---
+    **The Math:**
     """)
+    st.latex(r"R = \bar{r} \times 252")
+    st.caption("Annual return = average daily return × 252 trading days")
+    st.latex(r"\sigma = s \times \sqrt{252}")
+    st.caption("Annual volatility = daily std deviation × √252")
 
 
 @st.dialog("Sharpe Ratio")
@@ -141,7 +160,12 @@ def show_sharpe_info():
     - **Below 0**: You'd be better off in a savings account!
 
     The dashed line marks Sharpe = 1.0 as a reference.
+
+    ---
+    **The Math:**
     """)
+    st.latex(r"S = \frac{R_p - R_f}{\sigma_p}")
+    st.caption("Sharpe = (Portfolio return − Risk-free rate) ÷ Portfolio volatility")
 
 
 @st.dialog("Price History")
@@ -154,7 +178,12 @@ def show_price_info():
     - **Line going down**: Stock lost value
     - **Steeper line**: Faster gains or losses
     - **Wiggly line**: More volatile (riskier)
+
+    ---
+    **The Math:**
     """)
+    st.latex(r"P_{normalized}(t) = \frac{P(t)}{P(0)} \times 100")
+    st.caption("Normalized price = (current price ÷ starting price) × 100")
 
 
 @st.dialog("Correlation Matrix")
@@ -168,7 +197,12 @@ def show_correlation_info():
 
     For diversification, you want stocks with low correlation — when one
     goes down, another might go up!
+
+    ---
+    **The Math:**
     """)
+    st.latex(r"\rho_{xy} = \frac{\sum (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum (x_i - \bar{x})^2 \sum (y_i - \bar{y})^2}}")
+    st.caption("Correlation = how much two stocks move together, normalized to [-1, +1]")
 
 
 @st.dialog("About This App", width="large")
