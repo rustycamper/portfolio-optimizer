@@ -251,6 +251,8 @@ def main():
             st.session_state.last_preset = selected_preset
             if selected_preset != "Custom":
                 st.session_state.selected_tickers = PRESET_PORTFOLIOS[selected_preset].copy()
+                # Also update the widget's key state directly
+                st.session_state.ticker_multiselect = st.session_state.selected_tickers.copy()
 
         # Add custom ticker input first (before multiselect) so callback can update state
         if 'ticker_input' not in st.session_state:
@@ -280,6 +282,9 @@ def main():
         if st.session_state.pending_ticker:
             if st.session_state.pending_ticker not in st.session_state.selected_tickers:
                 st.session_state.selected_tickers.append(st.session_state.pending_ticker)
+                # Also update widget key if it exists
+                if 'ticker_multiselect' in st.session_state:
+                    st.session_state.ticker_multiselect = st.session_state.selected_tickers.copy()
             st.session_state.pending_ticker = None
 
         # Recalculate available tickers (may have changed if custom ticker was added)
@@ -289,10 +294,11 @@ def main():
             "Select stocks",
             options=available_tickers,
             default=st.session_state.selected_tickers,
+            key="ticker_multiselect",
             help="Pick at least 2 stocks. More stocks = more diversification!"
         )
 
-        # Sync selection back to session state
+        # Keep session state in sync with widget (widget is source of truth for user interactions)
         st.session_state.selected_tickers = selected_tickers
 
         st.text_input(

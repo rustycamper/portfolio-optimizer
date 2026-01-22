@@ -40,6 +40,22 @@ div[data-testid="stVerticalBlock"] > div:first-child div[data-testid="stColumn"]
     justify-content: flex-end !important;
     padding-bottom: 0.75rem !important;
 }
+
+/* Make multiselect X button larger for mobile tappability */
+[data-baseweb="tag"] svg {
+    width: 12px !important;
+    height: 12px !important;
+    stroke-width: 1px !important;
+}
+[data-baseweb="tag"] [aria-label="close"],
+[data-baseweb="tag"] span:last-child {
+    padding: 5px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
 """
 
 # Dark theme CSS
